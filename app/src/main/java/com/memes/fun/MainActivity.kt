@@ -1,84 +1,52 @@
 package com.memes.`fun`
 
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import android.os.Bundle
-import android.widget.Toast
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.memes.`fun`.adapter.MemesAdapter
-import com.memes.`fun`.api.model.Memes
-import com.memes.`fun`.helper.Constants.VISIBLE_TRESHOLD
-import com.memes.`fun`.helper.find
-import com.memes.`fun`.presenter.ImgApiPresenter
-import com.memes.`fun`.presenter.base.ImgView
+import androidx.fragment.app.Fragment
+import com.memes.`fun`.fragments.FeedFragment
+import com.memes.`fun`.fragments.SavedFragment
+import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity(), ImgView {
+class MainActivity : AppCompatActivity() {
 
-    private val presenter = ImgApiPresenter()
+    private val fragmentFeed = FeedFragment()
+    private val fragmentSaved = SavedFragment()
+    private val fm = supportFragmentManager
+    var active: Fragment = fragmentFeed
 
-    private lateinit var memesRecyclerView: RecyclerView
-    private lateinit var memesAdapter: MemesAdapter
-    private lateinit var layoutManager: LinearLayoutManager
 
-    private var totalItemCount = 0
-    private var lastVisibleItem = 0
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        presenter.bind(this)
+        fm.beginTransaction().add(R.id.main_fragment, fragmentSaved, "2").hide(fragmentSaved).commit()
+        fm.beginTransaction().add(R.id.main_fragment, fragmentFeed, "1").commit()
 
-        memesRecyclerView = find(R.id.memes_recycler_view)
-        memesRecyclerView.isNestedScrollingEnabled = false
-        layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
-        memesAdapter = MemesAdapter(presenter)
-        memesRecyclerView.adapter = memesAdapter
-        memesRecyclerView.layoutManager = layoutManager
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
 
-        setUpLoadMoreListener()
-        presenter.loadItems()
     }
 
-    private fun refreshRepositoriesList() {
-        memesAdapter.notifyDataSetChanged()
-    }
 
-    private fun setUpLoadMoreListener() {
-        memesRecyclerView.addOnScrollListener(object: RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
+    private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
+        when (item.itemId) {
+            R.id.navigation_feed -> {
+                fm.beginTransaction().hide(active).show(fragmentFeed).commit()
+                active = fragmentFeed
 
-                totalItemCount = memesRecyclerView.layoutManager!!.itemCount
-                lastVisibleItem = layoutManager.findLastVisibleItemPosition()
-
-                if (!presenter.loading && totalItemCount <= (lastVisibleItem + VISIBLE_TRESHOLD)) {
-                    presenter.onNextPage()
-                }
+                return@OnNavigationItemSelectedListener true
             }
-        })
-    }
+            R.id.navigation_saved -> {
+                fm.beginTransaction().hide(active).detach(fragmentSaved).attach(fragmentSaved).show(fragmentSaved).commit()
+                active = fragmentSaved
 
 
-    override fun onError(t: Throwable?) {
-        showToast(t.toString())
+                return@OnNavigationItemSelectedListener true
+            }
+        }
+        false
     }
 
-    override fun onLoad() {
-        refreshRepositoriesList()
-    }
-
-    override fun onNextPage() {
-        presenter.onNextPage()
-    }
-
-    private fun showToast(text: String) {
-        Toast.makeText(this, text, Toast.LENGTH_SHORT).show() //функция для показа Toast сообщений
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        presenter.compositeDisposable.dispose()
-        presenter.unbind()
-    }
 }

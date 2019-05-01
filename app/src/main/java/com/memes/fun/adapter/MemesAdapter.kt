@@ -27,7 +27,7 @@ class MemesAdapter(memesPresenter: ImgApiPresenter): RecyclerView.Adapter<MemesV
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MemesViewHolder {
-        return MemesViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.memes_item_view, parent, false))
+        return MemesViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.memes_item_view, parent, false), presenter)
     }
 
 }
