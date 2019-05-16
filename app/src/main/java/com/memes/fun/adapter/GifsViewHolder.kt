@@ -7,10 +7,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.Target
 import com.memes.`fun`.R
-import com.memes.`fun`.presenter.ImgApiPresenter
+import com.memes.`fun`.presenter.GifsApiPresenter
 
 
-class MemesViewHolder(itemView: View, presenter: ImgApiPresenter): RecyclerView.ViewHolder(itemView), MemesRowView {
+class GifsViewHolder(itemView: View, presenter: GifsApiPresenter): RecyclerView.ViewHolder(itemView), MemesRowView {
 
     var memesImage: ImageView = itemView.findViewById(R.id.memesThumb)
     var memesTitle: TextView = itemView.findViewById(R.id.memesTitle)
@@ -54,6 +54,7 @@ class MemesViewHolder(itemView: View, presenter: ImgApiPresenter): RecyclerView.
             .into(memesImage)*/
 
         Glide.with(itemView)
+            .asGif()
             .load(thumb)
             .placeholder(R.drawable.progress_animation)
             .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)

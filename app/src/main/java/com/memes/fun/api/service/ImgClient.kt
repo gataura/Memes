@@ -8,4 +8,5 @@ interface ImgClient {
 
     @GET("gimme")
     fun getMemes(): Flowable<Memes>
+
 }

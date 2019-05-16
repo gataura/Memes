@@ -1,6 +1,7 @@
 package com.memes.`fun`.fragments
 
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -18,17 +19,22 @@ import com.google.android.gms.ads.InterstitialAd
 import com.google.android.gms.ads.MobileAds
 
 import com.memes.`fun`.R
+import com.memes.`fun`.adapter.GifsAdapter
 import com.memes.`fun`.adapter.MemesAdapter
 import com.memes.`fun`.database.AppDatabase
+import com.memes.`fun`.presenter.GifsApiPresenter
 import com.memes.`fun`.presenter.ImgApiPresenter
 import com.memes.`fun`.presenter.base.ImgView
+import java.util.*
 
 class SavedFragment : Fragment(), ImgView {
 
     private lateinit var presenter: ImgApiPresenter
+    private lateinit var presenterGifs: GifsApiPresenter
 
     private lateinit var memesRecyclerView: RecyclerView
     private lateinit var memesAdapter: MemesAdapter
+    private lateinit var gifsAdapter: GifsAdapter
     private lateinit var layoutManager: LinearLayoutManager
     private lateinit var db: AppDatabase
     private lateinit var mSwipeRefreshLayout: SwipeRefreshLayout
@@ -43,17 +49,6 @@ class SavedFragment : Fragment(), ImgView {
         val view =  inflater.inflate(R.layout.fragment_saved, container, false)
         db = AppDatabase.getInstance(this.requireContext()) as AppDatabase
 
-        presenter = ImgApiPresenter()
-        presenter.bind(this)
-
-        mSwipeRefreshLayout = view.findViewById(R.id.saved_container)
-
-        memesRecyclerView = view.findViewById(R.id.saved_recycler_view)
-        memesRecyclerView.isNestedScrollingEnabled = false
-        layoutManager = LinearLayoutManager(this.requireContext(), RecyclerView.VERTICAL, false)
-        memesAdapter = MemesAdapter(presenter)
-        memesRecyclerView.adapter = memesAdapter
-        memesRecyclerView.layoutManager = layoutManager
 
         MobileAds.initialize(this.requireContext(), "ca-app-pub-3940256099942544~3347511713")
 
@@ -69,11 +64,42 @@ class SavedFragment : Fragment(), ImgView {
 
         }
 
-        presenter.getItemsFromDb(db)
+        presenter = ImgApiPresenter()
+        presenterGifs = GifsApiPresenter()
 
-        mSwipeRefreshLayout.setOnRefreshListener {
+        memesAdapter = MemesAdapter(presenter)
+        gifsAdapter = GifsAdapter(presenterGifs)
+        if (Locale.getDefault().language == "ru") {
+            presenterGifs.bind(this)
+        } else {
+            presenter.bind(this)
+        }
+
+        memesRecyclerView = view.findViewById(R.id.saved_recycler_view)
+        memesRecyclerView.isNestedScrollingEnabled = false
+        layoutManager = LinearLayoutManager(this.requireContext(), RecyclerView.VERTICAL, false)
+
+        if (Locale.getDefault().language == "ru") {
+            memesRecyclerView.adapter = gifsAdapter
+            memesRecyclerView.layoutManager = layoutManager
+
+            presenterGifs.getItemsFromDb(db)
+            mSwipeRefreshLayout = view.findViewById(R.id.saved_container)
+            mSwipeRefreshLayout.setOnRefreshListener {
+                presenterGifs.getItemsFromDb(db)
+                mSwipeRefreshLayout.isRefreshing = false
+            }
+        } else {
+            memesRecyclerView.adapter = memesAdapter
+            memesRecyclerView.layoutManager = layoutManager
+
+
             presenter.getItemsFromDb(db)
-            mSwipeRefreshLayout.isRefreshing = false
+            mSwipeRefreshLayout = view.findViewById(R.id.saved_container)
+            mSwipeRefreshLayout.setOnRefreshListener {
+                presenter.getItemsFromDb(db)
+                mSwipeRefreshLayout.isRefreshing = false
+            }
         }
 
         return view
@@ -84,7 +110,11 @@ class SavedFragment : Fragment(), ImgView {
     }
 
     private fun refreshRepositoriesList() {
-        memesAdapter.notifyDataSetChanged()
+        if (Locale.getDefault().language == "ru") {
+            gifsAdapter.notifyDataSetChanged()
+        } else {
+            memesAdapter.notifyDataSetChanged()
+        }
     }
 
     override fun getImgPopup(): ImagePopup {
@@ -114,14 +144,23 @@ class SavedFragment : Fragment(), ImgView {
         return mInterstitialAd
     }
 
+    override fun startIntent(sharingIntent: Intent) {
+        this.requireContext().startActivity(Intent.createChooser(sharingIntent, "Share via"))
+    }
+
     private fun showToast(text: String) {
         Toast.makeText(this.requireContext(), text, Toast.LENGTH_SHORT).show() //функция для показа Toast сообщений
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        presenter.compositeDisposable.dispose()
-        presenter.unbind()
+        if (Locale.getDefault().language == "ru") {
+            presenterGifs.compositeDisposable.dispose()
+            presenterGifs.unbind()
+        } else {
+            presenter.compositeDisposable.dispose()
+            presenter.unbind()
+        }
     }
 
 

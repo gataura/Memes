@@ -5,8 +5,9 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.memes.`fun`.api.model.Memes
+import com.memes.`fun`.api.model.YapxGifs
 
-@Database(entities = [Memes::class], version = 1)
+@Database(entities = [Memes::class, YapxGifs::class], version = 1)
 abstract class AppDatabase: RoomDatabase() {
 
 

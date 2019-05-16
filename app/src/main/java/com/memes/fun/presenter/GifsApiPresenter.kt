@@ -5,15 +5,12 @@ import android.content.Intent
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.ContextCompat.startActivity
 import com.memes.`fun`.R
-import com.memes.`fun`.api.model.Memes
 import com.memes.`fun`.presenter.base.BasePresenter
 import com.memes.`fun`.presenter.base.ImgView
 import com.memes.`fun`.adapter.MemesRowView
 import com.memes.`fun`.api.model.YapxGifs
 import com.memes.`fun`.api.service.mGifsClient
-import com.memes.`fun`.api.service.mImgClient
 import com.memes.`fun`.database.AppDatabase
 import com.memes.`fun`.helper.Constants.OFFSET
 import io.reactivex.Completable
@@ -27,11 +24,11 @@ import io.reactivex.schedulers.Schedulers
 
 
 
-class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
+class GifsApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
 
-    private var memesList = mutableListOf<Memes>()
+    private var gifsList = mutableListOf<YapxGifs>()
 
-    var memes = Memes()
+    var gifs = YapxGifs()
 
     var loading = false
 
@@ -40,20 +37,19 @@ class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
     var compositeDisposable = CompositeDisposable()
     private var pagination = PublishProcessor.create<Int>()
 
-    private val client = mImgClient().build()
+    private val client = mGifsClient().build()
 
 
     override fun getMemesCount(): Int {
-        return memesList.size
+        return gifsList.size
     }
 
     override fun onBindMemesRowViewAtPosition(position: Int, rowView: MemesRowView) {
-        memes = memesList[position]
-        rowView.setImage(memes.getUrl())
-        rowView.setTitle(memes.getTitle())
-        rowView.setLikes(memes.getLikes())
-        rowView.checkLiked(memes.getLiked())
-        isMemesInDb(memes, view?.getDb() as AppDatabase, rowView)
+        gifs = gifsList[position]
+        rowView.setImage(gifs.getImage_url())
+        rowView.setLikes(gifs.getLikes())
+        rowView.checkLiked(gifs.getLiked())
+        isMemesInDb(gifs, view?.getDb() as AppDatabase, rowView)
     }
 
 
@@ -76,8 +72,17 @@ class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
         val sharingIntent = Intent(android.content.Intent.ACTION_SEND)
         sharingIntent.type = "text/plain"
         sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "LoL, look at this memes: ")
-        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, memesList[adapterPosition].getUrl())
+        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, gifsList[adapterPosition].getImage_url())
         view?.startIntent(sharingIntent)
+        counter++
+        if (counter % 5 == 0) {
+            if (view?.getAd()!!.isLoaded) {
+                view?.getAd()?.show()
+            } else {
+                Log.d("TAG", "The interstitial wasn't loaded yet.")
+            }
+
+        }
     }
 
     fun onLikeIconClickAction(img: ImageView, adapterPosition: Int, likesCount: TextView) {
@@ -85,13 +90,13 @@ class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
         if (img.tag == "liked") {
             img.setImageResource(R.drawable.like_outline)
             img.tag = "not liked"
-            memesList[adapterPosition].setLiked(false)
-            likesCount.text = (memesList[adapterPosition].getLikes() - 1).toString()
+            gifsList[adapterPosition].setLiked(false)
+            likesCount.text = (gifsList[adapterPosition].getLikes() - 1).toString()
         } else {
             img.setImageResource(R.drawable.like_filled)
             img.tag = "liked"
-            memesList[adapterPosition].setLiked(true)
-            likesCount.text = (memesList[adapterPosition].getLikes() + 1).toString()
+            gifsList[adapterPosition].setLiked(true)
+            likesCount.text = (gifsList[adapterPosition].getLikes() + 1).toString()
         }
 
         counter++
@@ -110,11 +115,11 @@ class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
         if (img.tag == "saved") {
             img.setImageResource(R.drawable.save_icon_outline_24)
             img.tag = "not saved"
-            deleteFromDb(memesList[adapterPosition], view?.getDb() as AppDatabase)
+            deleteFromDb(gifsList[adapterPosition], view?.getDb() as AppDatabase)
         } else {
             img.setImageResource(R.drawable.save_icon_24)
             img.tag = "saved"
-            saveToDb(memesList[adapterPosition], view?.getDb() as AppDatabase)
+            saveToDb(gifsList[adapterPosition], view?.getDb() as AppDatabase)
         }
         counter++
         if (counter % 5 == 0) {
@@ -129,9 +134,7 @@ class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
 
     override fun onNextPage() {
         loading = true
-        for (i in 0 until 10) {
-            pagination.onNext(OFFSET)
-        }
+        pagination.onNext(OFFSET)
         view?.onLoad()
     }
 
@@ -145,8 +148,10 @@ class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
             }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                it.setLikes((12..470).random())
-                memesList.add(it)
+                for (i in it) {
+                    i.setLikes((12..470).random())
+                }
+                gifsList.addAll(it)
                 loading = false
                 view?.onLoad()
             }, {
@@ -160,26 +165,26 @@ class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
 
     @SuppressLint("CheckResult")
     fun getItemsFromDb(db: AppDatabase) {
-        Observable.fromCallable { db.memesDao().getAll() }
+        Observable.fromCallable { db.memesDao().getAllGifs() }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                memesList.clear()
-                memesList.addAll(it)
+                gifsList.clear()
+                gifsList.addAll(it)
                 view?.onLoad()
             }, {
                 view?.onError(it)
             })
     }
 
-    private fun getMemes(offset: Int): Flowable<Memes> {
-        return client.getMemes()
+    private fun getMemes(offset: Int): Flowable<List<YapxGifs>> {
+        return client.getMemes(offset)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
     }
 
     @SuppressLint("CheckResult")
-    fun saveToDb(data: Memes, db: AppDatabase) {
+    fun saveToDb(data: YapxGifs, db: AppDatabase) {
 
         Completable.fromAction{ db.memesDao().insert(data) }
             .subscribeOn(Schedulers.io())
@@ -191,7 +196,7 @@ class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
     }
 
     @SuppressLint("CheckResult")
-    fun deleteFromDb(data:Memes, db: AppDatabase) {
+    fun deleteFromDb(data:YapxGifs, db: AppDatabase) {
 
         Completable.fromAction{ db.memesDao().delete(data) }
             .subscribeOn(Schedulers.io())
@@ -204,9 +209,9 @@ class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
     }
 
     @SuppressLint("CheckResult")
-    fun isMemesInDb(data: Memes, db: AppDatabase, rowView: MemesRowView) {
+    fun isMemesInDb(data: YapxGifs, db: AppDatabase, rowView: MemesRowView) {
 
-        Observable.fromCallable { db.memesDao().memesCount(data.getUrl()) }
+        Observable.fromCallable { db.memesDao().gifsCount(data.getImage_url()) }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
