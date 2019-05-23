@@ -1,7 +1,9 @@
 package com.memes.`fun`.fragments
 
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -16,6 +18,7 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.InterstitialAd
 import com.google.android.gms.ads.MobileAds
+import com.google.firebase.analytics.FirebaseAnalytics
 
 import com.memes.`fun`.R
 import com.memes.`fun`.adapter.GifsAdapter
@@ -41,6 +44,10 @@ class FeedFragment : Fragment(), ImgView {
     private var totalItemCount = 0
     private var lastVisibleItem = 0
 
+    lateinit var prefs: SharedPreferences
+
+    private var lang: String = ""
+
     private lateinit var mInterstitialAd: InterstitialAd
 
     override fun onCreateView(
@@ -56,6 +63,19 @@ class FeedFragment : Fragment(), ImgView {
         mInterstitialAd = InterstitialAd(this.requireContext())
         mInterstitialAd.adUnitId = "ca-app-pub-3940256099942544/1033173712"
         mInterstitialAd.loadAd(AdRequest.Builder().build())
+
+        prefs = this.requireContext().getSharedPreferences("com.memes.`fun`", Context.MODE_PRIVATE)
+
+        if (prefs.getBoolean("firstrun", true)) {
+            setLanguages()
+            prefs.edit().putBoolean("firstrun", false).apply()
+        } else {
+            lang = prefs.getString("language", "")
+        }
+
+
+        prefs.edit().putString("language", lang).apply()
+
 
         mInterstitialAd.adListener = object: AdListener() {
 
@@ -174,6 +194,10 @@ class FeedFragment : Fragment(), ImgView {
         return mInterstitialAd
     }
 
+    override fun getPrefs(): String {
+        return lang
+    }
+
     override fun startIntent(sharingIntent: Intent) {
         this.requireContext().startActivity(Intent.createChooser(sharingIntent, "Share via"))
     }
@@ -190,6 +214,16 @@ class FeedFragment : Fragment(), ImgView {
         } else {
             presenter.compositeDisposable.dispose()
             presenter.unbind()
+        }
+    }
+
+    fun setLanguages() {
+        when (Locale.getDefault().language) {
+            "es" -> lang = "/memexico"
+            "pt" -> lang = "/PORTUGALCARALHO"
+            "hi" -> lang = "/IndianDankMemes"
+            "in" -> lang = "/indonesia"
+            "en" -> lang = ""
         }
     }
 

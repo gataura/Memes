@@ -173,7 +173,7 @@ class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
     }
 
     private fun getMemes(offset: Int): Flowable<Memes> {
-        return client.getMemes()
+        return client.getMemes(view?.getPrefs())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
     }

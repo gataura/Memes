@@ -8,6 +8,18 @@
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
+    <androidx.appcompat.widget.Toolbar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="384dp"
+            app:layout_constraintEnd_toEndOf="@+id/main_fragment"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            style="@style/Toolbar" android:id="@+id/custom_toolbar"
+            app:layout_constraintBottom_toBottomOf="@+id/navigation"
+            app:layout_constraintTop_toTopOf="parent" app:layout_constraintVertical_bias="0.0">
+    </androidx.appcompat.widget.Toolbar>
+
     <FrameLayout
             android:id="@+id/main_fragment"
             android:layout_width="match_parent"
@@ -15,7 +27,8 @@
             app:layout_constraintBottom_toTopOf="@+id/navigation"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintTop_toBottomOf="@+id/custom_toolbar"/>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/navigation"

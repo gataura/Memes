@@ -152,6 +152,10 @@ class SavedFragment : Fragment(), ImgView {
         Toast.makeText(this.requireContext(), text, Toast.LENGTH_SHORT).show() //функция для показа Toast сообщений
     }
 
+    override fun getPrefs(): String {
+        return ""
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         if (Locale.getDefault().language == "ru") {
