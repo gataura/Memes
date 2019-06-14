@@ -33,6 +33,7 @@ class GifsApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
     var loading = false
 
     var counter = 0
+    var adCounter = 0
 
     var compositeDisposable = CompositeDisposable()
     private var pagination = PublishProcessor.create<Int>()
@@ -57,15 +58,7 @@ class GifsApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
         val imagePopup = view?.getImgPopup()
         imagePopup?.initiatePopup(imageView.drawable)
         imagePopup?.viewPopup()
-        counter++
-        if (counter % 5 == 0) {
-            if (view?.getAd()!!.isLoaded) {
-                view?.getAd()?.show()
-            } else {
-                Log.d("TAG", "The interstitial wasn't loaded yet.")
-            }
-
-        }
+        counterAd()
     }
 
     fun onShareClickAction(adapterPosition: Int) {
@@ -74,15 +67,7 @@ class GifsApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
         sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "LoL, look at this memes: ")
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, gifsList[adapterPosition].getImage_url())
         view?.startIntent(sharingIntent)
-        counter++
-        if (counter % 5 == 0) {
-            if (view?.getAd()!!.isLoaded) {
-                view?.getAd()?.show()
-            } else {
-                Log.d("TAG", "The interstitial wasn't loaded yet.")
-            }
-
-        }
+        counterAd()
     }
 
     fun onLikeIconClickAction(img: ImageView, adapterPosition: Int, likesCount: TextView) {
@@ -99,15 +84,7 @@ class GifsApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
             likesCount.text = (gifsList[adapterPosition].getLikes() + 1).toString()
         }
 
-        counter++
-        if (counter % 5 == 0) {
-            if (view?.getAd()!!.isLoaded) {
-                view?.getAd()?.show()
-            } else {
-                Log.d("TAG", "The interstitial wasn't loaded yet.")
-            }
-
-        }
+        counterAd()
 
     }
 
@@ -121,15 +98,7 @@ class GifsApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
             img.tag = "saved"
             saveToDb(gifsList[adapterPosition], view?.getDb() as AppDatabase)
         }
-        counter++
-        if (counter % 5 == 0) {
-            if (view?.getAd()!!.isLoaded) {
-                view?.getAd()?.show()
-            } else {
-                Log.d("TAG", "The interstitial wasn't loaded yet.")
-            }
-
-        }
+        counterAd()
     }
 
     override fun onNextPage() {
@@ -220,5 +189,20 @@ class GifsApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
                 }
             }
 
+    }
+
+    fun counterAd() {
+        counter++
+        if (counter % view!!.getOpenAd() == 0) {
+            if (view?.getAd()!!.isLoaded) {
+                if (adCounter != view!!.getAdCounter()) {
+                    view?.getAd()?.show()
+                    adCounter++
+                }
+            } else {
+                Log.d("TAG", "The interstitial wasn't loaded yet.")
+            }
+
+        }
     }
 }

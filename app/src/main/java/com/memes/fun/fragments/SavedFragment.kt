@@ -17,6 +17,8 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.InterstitialAd
 import com.google.android.gms.ads.MobileAds
+import com.google.firebase.FirebaseApp
+import com.google.firebase.database.*
 
 import com.memes.`fun`.R
 import com.memes.`fun`.adapter.GifsAdapter
@@ -41,6 +43,11 @@ class SavedFragment : Fragment(), ImgView {
 
     private lateinit var mInterstitialAd: InterstitialAd
 
+    lateinit var myRef: DatabaseReference
+    lateinit var database: FirebaseDatabase
+    var dbValue: Long = 0
+    var adCounter: Long = 0
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -48,6 +55,22 @@ class SavedFragment : Fragment(), ImgView {
         // Inflate the layout for this fragment
         val view =  inflater.inflate(R.layout.fragment_saved, container, false)
         db = AppDatabase.getInstance(this.requireContext()) as AppDatabase
+
+        FirebaseApp.initializeApp(this.requireContext())
+        database = FirebaseDatabase.getInstance()
+        myRef = database.reference
+
+        myRef.addValueEventListener(object: ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                dbValue = p0.child("openAd").value as Long
+                adCounter = p0.child("adCounter").value as Long
+            }
+
+        })
 
 
         MobileAds.initialize(this.requireContext(), "ca-app-pub-3940256099942544~3347511713")
@@ -154,6 +177,14 @@ class SavedFragment : Fragment(), ImgView {
 
     override fun getPrefs(): String {
         return ""
+    }
+
+    override fun getOpenAd(): Int {
+        return dbValue.toInt()
+    }
+
+    override fun getAdCounter(): Int {
+        return adCounter.toInt()
     }
 
     override fun onDestroy() {

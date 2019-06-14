@@ -18,7 +18,9 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.InterstitialAd
 import com.google.android.gms.ads.MobileAds
+import com.google.firebase.FirebaseApp
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.database.*
 
 import com.memes.`fun`.R
 import com.memes.`fun`.adapter.GifsAdapter
@@ -44,9 +46,16 @@ class FeedFragment : Fragment(), ImgView {
     private var totalItemCount = 0
     private var lastVisibleItem = 0
 
+    lateinit var myRef: DatabaseReference
+    lateinit var database: FirebaseDatabase
+    var dbValue: Long = 0
+    var adCounter: Long = 0
+
     lateinit var prefs: SharedPreferences
 
     private var lang: String = ""
+
+    var isFirstLoad = true
 
     private lateinit var mInterstitialAd: InterstitialAd
 
@@ -57,6 +66,22 @@ class FeedFragment : Fragment(), ImgView {
         // Inflate the layout for this fragment
         val view =  inflater.inflate(R.layout.fragment_feed, container, false)
         db = AppDatabase.getInstance(this.requireContext()) as AppDatabase
+
+        FirebaseApp.initializeApp(this.requireContext())
+        database = FirebaseDatabase.getInstance()
+        myRef = database.reference
+
+        myRef.addValueEventListener(object: ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {
+
+            }
+
+            override fun onDataChange(p0: DataSnapshot) {
+                dbValue = p0.child("openAd").value as Long
+                adCounter = p0.child("adCounter").value as Long
+            }
+
+        })
 
         MobileAds.initialize(this.requireContext(), "ca-app-pub-3940256099942544~3347511713")
 
@@ -81,6 +106,13 @@ class FeedFragment : Fragment(), ImgView {
 
             override fun onAdClosed() {
                 mInterstitialAd.loadAd(AdRequest.Builder().build())
+            }
+
+            override fun onAdLoaded() {
+                if (isFirstLoad) {
+                    mInterstitialAd.show()
+                    isFirstLoad = false
+                }
             }
 
         }
@@ -196,6 +228,14 @@ class FeedFragment : Fragment(), ImgView {
 
     override fun getPrefs(): String {
         return lang
+    }
+
+    override fun getOpenAd(): Int {
+        return dbValue.toInt()
+    }
+
+    override fun getAdCounter(): Int {
+        return adCounter.toInt()
     }
 
     override fun startIntent(sharingIntent: Intent) {

@@ -16,4 +16,6 @@ interface ImgView: BaseView {
     fun getAd(): InterstitialAd
     fun startIntent(sharingIntent: Intent)
     fun getPrefs(): String
+    fun getOpenAd(): Int
+    fun getAdCounter(): Int
 }
