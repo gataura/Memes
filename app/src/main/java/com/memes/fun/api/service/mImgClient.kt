@@ -1,5 +1,6 @@
 package com.memes.`fun`.api.service
 
+import com.google.gson.GsonBuilder
 import com.memes.`fun`.helper.Constants.BASE_URL
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory

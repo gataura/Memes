@@ -1,11 +1,13 @@
 package com.memes.`fun`.api.service
 
+import com.google.gson.GsonBuilder
 import com.memes.`fun`.helper.Constants.BASE_URL_YAPX
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
 class mGifsClient {
+
 
     private var builder = Retrofit
         .Builder()

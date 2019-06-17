@@ -83,10 +83,10 @@ class FeedFragment : Fragment(), ImgView {
 
         })
 
-        MobileAds.initialize(this.requireContext(), "ca-app-pub-3940256099942544~3347511713")
+        MobileAds.initialize(this.requireContext(), "ca-app-pub-9561253976720525~2978570952")
 
         mInterstitialAd = InterstitialAd(this.requireContext())
-        mInterstitialAd.adUnitId = "ca-app-pub-3940256099942544/1033173712"
+        mInterstitialAd.adUnitId = "ca-app-pub-9561253976720525/4135793851"
         mInterstitialAd.loadAd(AdRequest.Builder().build())
 
         prefs = this.requireContext().getSharedPreferences("com.memes.`fun`", Context.MODE_PRIVATE)
@@ -123,17 +123,18 @@ class FeedFragment : Fragment(), ImgView {
         memesAdapter = MemesAdapter(presenter)
         gifsAdapter = GifsAdapter(presenterGifs)
 
-        if (Locale.getDefault().language == "ru") {
+       /* if (Locale.getDefault().language == "ru") {
             presenterGifs.bind(this)
         } else {
             presenter.bind(this)
-        }
+        }*/
+        presenter.bind(this)
 
         memesRecyclerView = view.findViewById(R.id.memes_recycler_view)
         memesRecyclerView.isNestedScrollingEnabled = false
         layoutManager = LinearLayoutManager(this.requireContext(), RecyclerView.VERTICAL, false)
 
-        if (Locale.getDefault().language == "ru") {
+       /* if (Locale.getDefault().language == "ru") {
             memesRecyclerView.adapter = gifsAdapter
             memesRecyclerView.layoutManager = layoutManager
 
@@ -146,18 +147,24 @@ class FeedFragment : Fragment(), ImgView {
 
             setUpLoadMoreListener()
             presenter.loadItems()
-        }
+        }*/
+        memesRecyclerView.adapter = memesAdapter
+        memesRecyclerView.layoutManager = layoutManager
 
+
+        setUpLoadMoreListener()
+        presenter.loadItems()
 
         return view
     }
 
     private fun refreshRepositoriesList() {
-        if (Locale.getDefault().language == "ru") {
+        /*if (Locale.getDefault().language == "ru") {
             gifsAdapter.notifyDataSetChanged()
         } else {
             memesAdapter.notifyDataSetChanged()
-        }
+        }*/
+        memesAdapter.notifyDataSetChanged()
     }
 
     private fun setUpLoadMoreListener() {
@@ -200,11 +207,12 @@ class FeedFragment : Fragment(), ImgView {
     }
 
     override fun onNextPage() {
-        if (Locale.getDefault().language == "ru") {
+        /*if (Locale.getDefault().language == "ru") {
             presenterGifs.onNextPage()
         } else {
             presenter.onNextPage()
-        }
+        }*/
+        presenter.onNextPage()
     }
 
     override fun getImgPopup(): ImagePopup {
@@ -248,13 +256,15 @@ class FeedFragment : Fragment(), ImgView {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (Locale.getDefault().language == "ru") {
+        /*if (Locale.getDefault().language == "ru") {
             presenterGifs.compositeDisposable.dispose()
             presenterGifs.unbind()
         } else {
             presenter.compositeDisposable.dispose()
             presenter.unbind()
-        }
+        }*/
+        presenter.compositeDisposable.dispose()
+        presenter.unbind()
     }
 
     fun setLanguages() {
@@ -264,6 +274,7 @@ class FeedFragment : Fragment(), ImgView {
             "hi" -> lang = "/IndianDankMemes"
             "in" -> lang = "/indonesia"
             "en" -> lang = ""
+            "ru" -> lang = "/ANormalDayInRussia"
         }
     }
 
