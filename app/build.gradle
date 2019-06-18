@@ -70,6 +70,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:17.4.0'
     implementation 'com.google.firebase:firebase-database:17.0.0'
 
+    //Facebook
+    implementation 'com.facebook.android:facebook-android-sdk:[4,5)'
+
     debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
     testImplementation 'junit:junit:4.12'
     kapt "androidx.room:room-compiler:2.1.0-alpha07"
