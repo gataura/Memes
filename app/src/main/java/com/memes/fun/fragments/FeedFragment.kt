@@ -109,10 +109,10 @@ class FeedFragment : Fragment(), ImgView {
             }
 
             override fun onAdLoaded() {
-                if (isFirstLoad) {
-                    mInterstitialAd.show()
-                    isFirstLoad = false
-                }
+//                if (isFirstLoad) {
+//                    mInterstitialAd.show()
+//                    isFirstLoad = false
+//                }
             }
 
         }
