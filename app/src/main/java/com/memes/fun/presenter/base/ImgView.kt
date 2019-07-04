@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import com.ceylonlabs.imageviewpopup.ImagePopup
 import com.google.android.gms.ads.InterstitialAd
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.memes.`fun`.database.AppDatabase
 
 interface ImgView: BaseView {
@@ -18,4 +19,5 @@ interface ImgView: BaseView {
     fun getPrefs(): String
     fun getOpenAd(): Int
     fun getAdCounter(): Int
+    fun getFirebaseAn(): FirebaseAnalytics
 }

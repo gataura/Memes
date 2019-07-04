@@ -18,6 +18,7 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.InterstitialAd
 import com.google.android.gms.ads.MobileAds
 import com.google.firebase.FirebaseApp
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.database.*
 
 import com.memes.`fun`.R
@@ -45,6 +46,7 @@ class SavedFragment : Fragment(), ImgView {
 
     lateinit var myRef: DatabaseReference
     lateinit var database: FirebaseDatabase
+    lateinit var firebaseAnalytics: FirebaseAnalytics
     var dbValue: Long = 0
     var adCounter: Long = 0
 
@@ -72,6 +74,7 @@ class SavedFragment : Fragment(), ImgView {
 
         })
 
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this.requireContext())
 
         MobileAds.initialize(this.requireContext(), "ca-app-pub-3940256099942544~3347511713")
 
@@ -185,6 +188,10 @@ class SavedFragment : Fragment(), ImgView {
 
     override fun getAdCounter(): Int {
         return adCounter.toInt()
+    }
+
+    override fun getFirebaseAn(): FirebaseAnalytics {
+        return firebaseAnalytics
     }
 
     override fun onDestroy() {

@@ -2,6 +2,7 @@ package com.memes.`fun`.presenter
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
@@ -62,6 +63,9 @@ class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
         val imagePopup = view?.getImgPopup()
         imagePopup?.initiatePopup(imageView.drawable)
         imagePopup?.viewPopup()
+        val bundle = Bundle()
+        bundle.putString("imageClick", "imageClick")
+        view?.getFirebaseAn()?.logEvent("imageClick", bundle)
         counterAd()
     }
 
@@ -70,6 +74,9 @@ class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
         sharingIntent.type = "text/plain"
         sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "LoL, look at this memes: ")
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, memesList[adapterPosition].getUrl())
+        val bundle = Bundle()
+        bundle.putString("shareClick", "shareClick")
+        view?.getFirebaseAn()?.logEvent("shareClick", bundle)
         view?.startIntent(sharingIntent)
     }
 
@@ -86,7 +93,9 @@ class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
             memesList[adapterPosition].setLiked(true)
             likesCount.text = (memesList[adapterPosition].getLikes() + 1).toString()
         }
-
+        val bundle = Bundle()
+        bundle.putString("likeClick", "likeClick")
+        view?.getFirebaseAn()?.logEvent("likeClick", bundle)
         counterAd()
 
     }
@@ -101,6 +110,9 @@ class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
             img.tag = "saved"
             saveToDb(memesList[adapterPosition], view?.getDb() as AppDatabase)
         }
+        val bundle = Bundle()
+        bundle.putString("saveClick", "saveClick")
+        view?.getFirebaseAn()?.logEvent("saveClick", bundle)
         counterAd()
     }
 

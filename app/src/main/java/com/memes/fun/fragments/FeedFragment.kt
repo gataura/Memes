@@ -48,6 +48,7 @@ class FeedFragment : Fragment(), ImgView {
 
     lateinit var myRef: DatabaseReference
     lateinit var database: FirebaseDatabase
+    lateinit var firebaseAnalytics: FirebaseAnalytics
     var dbValue: Long = 0
     var adCounter: Long = 0
 
@@ -82,6 +83,8 @@ class FeedFragment : Fragment(), ImgView {
             }
 
         })
+
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this.requireContext())
 
         MobileAds.initialize(this.requireContext(), "ca-app-pub-9561253976720525~2978570952")
 
@@ -244,6 +247,10 @@ class FeedFragment : Fragment(), ImgView {
 
     override fun getAdCounter(): Int {
         return adCounter.toInt()
+    }
+
+    override fun getFirebaseAn(): FirebaseAnalytics {
+        return firebaseAnalytics
     }
 
     override fun startIntent(sharingIntent: Intent) {
