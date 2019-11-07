@@ -47,9 +47,9 @@ class GifsApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
 
     override fun onBindMemesRowViewAtPosition(position: Int, rowView: MemesRowView) {
         gifs = gifsList[position]
-        rowView.setImage(gifs.getImage_url())
-        rowView.setLikes(gifs.getLikes())
-        rowView.checkLiked(gifs.getLiked())
+        rowView.setImage(gifs.image_url)
+        rowView.setLikes(gifs.likes)
+        rowView.checkLiked(gifs.liked)
         isMemesInDb(gifs, view?.getDb() as AppDatabase, rowView)
     }
 
@@ -62,10 +62,10 @@ class GifsApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
     }
 
     fun onShareClickAction(adapterPosition: Int) {
-        val sharingIntent = Intent(android.content.Intent.ACTION_SEND)
+        val sharingIntent = Intent(Intent.ACTION_SEND)
         sharingIntent.type = "text/plain"
-        sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "LoL, look at this memes: ")
-        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, gifsList[adapterPosition].getImage_url())
+        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "LoL, look at this memes: ")
+        sharingIntent.putExtra(Intent.EXTRA_TEXT, gifsList[adapterPosition].image_url)
         view?.startIntent(sharingIntent)
         counterAd()
     }
@@ -75,13 +75,13 @@ class GifsApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
         if (img.tag == "liked") {
             img.setImageResource(R.drawable.like_outline)
             img.tag = "not liked"
-            gifsList[adapterPosition].setLiked(false)
-            likesCount.text = (gifsList[adapterPosition].getLikes() - 1).toString()
+            gifsList[adapterPosition].liked = false
+            likesCount.text = (gifsList[adapterPosition].likes - 1).toString()
         } else {
             img.setImageResource(R.drawable.like_filled)
             img.tag = "liked"
-            gifsList[adapterPosition].setLiked(true)
-            likesCount.text = (gifsList[adapterPosition].getLikes() + 1).toString()
+            gifsList[adapterPosition].liked = true
+            likesCount.text = (gifsList[adapterPosition].likes + 1).toString()
         }
 
         counterAd()
@@ -118,7 +118,7 @@ class GifsApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 for (i in it) {
-                    i.setLikes((12..470).random())
+                    i.likes = (12..470).random()
                 }
                 gifsList.addAll(it)
                 loading = false
@@ -180,7 +180,7 @@ class GifsApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
     @SuppressLint("CheckResult")
     fun isMemesInDb(data: YapxGifs, db: AppDatabase, rowView: MemesRowView) {
 
-        Observable.fromCallable { db.memesDao().gifsCount(data.getImage_url()) }
+        Observable.fromCallable { db.memesDao().gifsCount(data.image_url) }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {

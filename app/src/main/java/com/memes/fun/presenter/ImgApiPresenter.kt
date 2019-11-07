@@ -9,7 +9,6 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat.startActivity
 import com.memes.`fun`.R
 import com.memes.`fun`.api.model.Memes
-import com.memes.`fun`.presenter.base.BasePresenter
 import com.memes.`fun`.presenter.base.ImgView
 import com.memes.`fun`.adapter.MemesRowView
 import com.memes.`fun`.api.model.YapxGifs
@@ -17,6 +16,7 @@ import com.memes.`fun`.api.service.mGifsClient
 import com.memes.`fun`.api.service.mImgClient
 import com.memes.`fun`.database.AppDatabase
 import com.memes.`fun`.helper.Constants.OFFSET
+import com.memes.`fun`.presenter.base.BasePresenter
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Observable
@@ -51,10 +51,10 @@ class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
 
     override fun onBindMemesRowViewAtPosition(position: Int, rowView: MemesRowView) {
         memes = memesList[position]
-        rowView.setImage(memes.getUrl())
-        rowView.setTitle(memes.getTitle())
-        rowView.setLikes(memes.getLikes())
-        rowView.checkLiked(memes.getLiked())
+        rowView.setImage(memes.url)
+        rowView.setTitle(memes.title)
+        rowView.setLikes(memes.likes)
+        rowView.checkLiked(memes.liked)
         isMemesInDb(memes, view?.getDb() as AppDatabase, rowView)
     }
 
@@ -70,10 +70,10 @@ class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
     }
 
     fun onShareClickAction(adapterPosition: Int) {
-        val sharingIntent = Intent(android.content.Intent.ACTION_SEND)
+        val sharingIntent = Intent(Intent.ACTION_SEND)
         sharingIntent.type = "text/plain"
-        sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "LoL, look at this memes: ")
-        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, memesList[adapterPosition].getUrl())
+        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "LoL, look at this memes: ")
+        sharingIntent.putExtra(Intent.EXTRA_TEXT, memesList[adapterPosition].url)
         val bundle = Bundle()
         bundle.putString("shareClick", "shareClick")
         view?.getFirebaseAn()?.logEvent("shareClick", bundle)
@@ -85,13 +85,13 @@ class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
         if (img.tag == "liked") {
             img.setImageResource(R.drawable.like_outline)
             img.tag = "not liked"
-            memesList[adapterPosition].setLiked(false)
-            likesCount.text = (memesList[adapterPosition].getLikes() - 1).toString()
+            memesList[adapterPosition].liked = false
+            likesCount.text = (memesList[adapterPosition].likes - 1).toString()
         } else {
             img.setImageResource(R.drawable.like_filled)
             img.tag = "liked"
-            memesList[adapterPosition].setLiked(true)
-            likesCount.text = (memesList[adapterPosition].getLikes() + 1).toString()
+            memesList[adapterPosition].liked = true
+            likesCount.text = (memesList[adapterPosition].likes + 1).toString()
         }
         val bundle = Bundle()
         bundle.putString("likeClick", "likeClick")
@@ -134,7 +134,7 @@ class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
             }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                it.setLikes((12..470).random())
+                it.likes = (12..470).random()
                 memesList.add(it)
                 loading = false
                 view?.onLoad()
@@ -195,7 +195,7 @@ class ImgApiPresenter: BasePresenter<ImgView>(), IImgPresenter {
     @SuppressLint("CheckResult")
     fun isMemesInDb(data: Memes, db: AppDatabase, rowView: MemesRowView) {
 
-        Observable.fromCallable { db.memesDao().memesCount(data.getUrl()) }
+        Observable.fromCallable { db.memesDao().memesCount(data.url) }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {

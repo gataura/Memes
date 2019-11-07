@@ -185,20 +185,20 @@ class FeedFragment : Fragment(), ImgView {
         })
     }
 
-    private fun setUpLoadMoreListenerGifs() {
-        memesRecyclerView.addOnScrollListener(object: RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-
-                totalItemCount = memesRecyclerView.layoutManager!!.itemCount
-                lastVisibleItem = layoutManager.findLastVisibleItemPosition()
-
-                if (!presenterGifs.loading && totalItemCount <= (lastVisibleItem + Constants.VISIBLE_TRESHOLD)) {
-                    presenterGifs.onNextPage()
-                }
-            }
-        })
-    }
+//    private fun setUpLoadMoreListenerGifs() {
+//        memesRecyclerView.addOnScrollListener(object: RecyclerView.OnScrollListener() {
+//            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+//                super.onScrolled(recyclerView, dx, dy)
+//
+//                totalItemCount = memesRecyclerView.layoutManager!!.itemCount
+//                lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+//
+//                if (!presenterGifs.loading && totalItemCount <= (lastVisibleItem + Constants.VISIBLE_TRESHOLD)) {
+//                    presenterGifs.onNextPage()
+//                }
+//            }
+//        })
+//    }
 
 
     override fun onError(t: Throwable?) {
